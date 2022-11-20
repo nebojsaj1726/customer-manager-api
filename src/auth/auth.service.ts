@@ -20,19 +20,15 @@ export class AuthService {
     return bcrypt.hash(password, 12);
   }
 
-  async register(user: Readonly<UserDto>): Promise<User | any> {
+  async register(user: Readonly<UserDto>): Promise<{ message: string }> {
     const { firstName, email, password } = user;
     const existingUser = await this.userService.findByEmail(email);
     if (existingUser) {
       throw new BadRequestException('Email taken');
     }
     const hashedPassword = await this.hashPassword(password);
-    const newUser = await this.userService.create(
-      firstName,
-      email,
-      hashedPassword,
-    );
-    return this.userService.getUser(newUser);
+    await this.userService.create(firstName, email, hashedPassword);
+    return { message: 'User successfully registered' };
   }
 
   async passwordMatch(

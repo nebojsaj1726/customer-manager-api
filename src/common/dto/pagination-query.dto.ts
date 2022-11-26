@@ -2,8 +2,8 @@ import { IsOptional } from 'class-validator';
 
 export class PaginationQueryDto {
   @IsOptional()
-  limit: number;
+  page: number;
 
   @IsOptional()
-  offset: number;
+  limit: number;
 }

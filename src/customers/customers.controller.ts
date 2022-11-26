@@ -14,8 +14,8 @@ import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { Customer } from './interfaces/customer.interface';
 import { AuthGuard } from '@nestjs/passport';
+import { FilterQueryDto } from 'src/common/dto/filter-query.dto';
 
 @ApiTags('customers')
 @Controller('customers')
@@ -24,23 +24,25 @@ export class CustomersController {
 
   @Get()
   @UseGuards(AuthGuard('jwt'))
-  getAllCustomers(
-    @Query() paginationQuery: PaginationQueryDto,
-  ): Promise<Customer[]> {
+  getAllCustomers(@Query() paginationQuery: PaginationQueryDto) {
     return this.customersService.findAll(paginationQuery);
+  }
+
+  @Get('/search')
+  @UseGuards(AuthGuard('jwt'))
+  getCustomersByCompany(@Query() filterQuery: FilterQueryDto) {
+    return this.customersService.findByCompany(filterQuery);
   }
 
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
-  getCustomer(@Param('id') customerId: string): Promise<Customer | null> {
+  getCustomer(@Param('id') customerId: string) {
     return this.customersService.findOne(customerId);
   }
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  addCustomer(
-    @Body() createCustomerDto: CreateCustomerDto,
-  ): Promise<Customer | null> {
+  addCustomer(@Body() createCustomerDto: CreateCustomerDto) {
     return this.customersService.create(createCustomerDto);
   }
 
@@ -49,7 +51,7 @@ export class CustomersController {
   updateCustomer(
     @Param('id') customerId: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
-  ): Promise<Customer | null> {
+  ) {
     return this.customersService.update(customerId, updateCustomerDto);
   }
 

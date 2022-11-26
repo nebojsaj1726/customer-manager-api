@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/user/interfaces/user.interface';
 import { UserDto } from 'src/user/dto/user.dto';
 import { JwtService } from '@nestjs/jwt';
 
@@ -16,11 +15,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async hashPassword(password: string): Promise<string> {
+  async hashPassword(password: string) {
     return bcrypt.hash(password, 12);
   }
 
-  async register(user: Readonly<UserDto>): Promise<{ message: string }> {
+  async register(user: Readonly<UserDto>) {
     const { firstName, email, password } = user;
     const existingUser = await this.userService.findByEmail(email);
     if (existingUser) {
@@ -31,14 +30,11 @@ export class AuthService {
     return { message: 'User successfully registered' };
   }
 
-  async passwordMatch(
-    password: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
+  async passwordMatch(password: string, hashedPassword: string) {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  async validateUser(email: string, password: string): Promise<User | null> {
+  async validateUser(email: string, password: string) {
     const user = await this.userService.findByEmail(email);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -50,7 +46,7 @@ export class AuthService {
     return this.userService.getUser(user);
   }
 
-  async login(existingUser: UserDto): Promise<{ token: string } | null> {
+  async login(existingUser: UserDto) {
     const { email, password } = existingUser;
     const user = await this.validateUser(email, password);
     const jwt = await this.jwtService.signAsync({ user });

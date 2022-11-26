@@ -5,11 +5,11 @@ import {
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Customer } from './interfaces/customer.interface';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerDocument } from './schemas/customer.schema';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { FilterQueryDto } from 'src/common/dto/filter-query.dto';
 
 @Injectable()
 export class CustomersService {
@@ -18,15 +18,24 @@ export class CustomersService {
     private readonly customerModel: Model<CustomerDocument>,
   ) {}
 
-  public async findAll(
-    paginationQuery: PaginationQueryDto,
-  ): Promise<CustomerDocument[]> {
-    const { limit, offset } = paginationQuery;
-
-    return await this.customerModel.find().skip(offset).limit(limit).exec();
+  async findAll(paginationQuery: PaginationQueryDto) {
+    const { page, limit } = paginationQuery;
+    const data = await this.customerModel
+      .find()
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+    return { data, page };
   }
 
-  public async findOne(customerId: string): Promise<CustomerDocument> {
+  async findByCompany(filterQuery: FilterQueryDto) {
+    const { company } = filterQuery;
+    return this.customerModel.find({
+      company: { $regex: company, $options: 'i' },
+    });
+  }
+
+  async findOne(customerId: string) {
     const customer = await this.customerModel.findById(customerId).exec();
     if (!customer) {
       throw new NotFoundException('Customer not found.');
@@ -34,7 +43,7 @@ export class CustomersService {
     return customer;
   }
 
-  public async create(createCustomerDto: CreateCustomerDto): Promise<Customer> {
+  async create(createCustomerDto: CreateCustomerDto) {
     const { email } = createCustomerDto;
     const existingCustomer = await this.customerModel.findOne({ email }).exec();
     if (existingCustomer) {
@@ -44,10 +53,7 @@ export class CustomersService {
     return newCustomer;
   }
 
-  public async update(
-    customerId: string,
-    updateCustomerDto: UpdateCustomerDto,
-  ): Promise<Customer> {
+  async update(customerId: string, updateCustomerDto: UpdateCustomerDto) {
     const existingCustomer = await this.customerModel.findByIdAndUpdate(
       customerId,
       updateCustomerDto,
@@ -58,7 +64,7 @@ export class CustomersService {
     return existingCustomer;
   }
 
-  public async remove(customerId: string): Promise<{ message: string }> {
+  async remove(customerId: string) {
     const deletedCustomer = await this.customerModel.findByIdAndRemove(
       customerId,
     );

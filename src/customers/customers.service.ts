@@ -38,7 +38,7 @@ export class CustomersService {
   async findOne(customerId: string) {
     const customer = await this.customerModel.findById(customerId).exec();
     if (!customer) {
-      throw new NotFoundException('Customer not found.');
+      throw new NotFoundException('Customer not found');
     }
     return customer;
   }

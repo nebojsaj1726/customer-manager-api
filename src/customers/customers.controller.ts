@@ -8,6 +8,8 @@ import {
   Query,
   UseGuards,
   Patch,
+  UseInterceptors,
+  CacheInterceptor,
 } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -19,6 +21,7 @@ import { FilterQueryDto } from 'src/common/dto/filter-query.dto';
 
 @ApiTags('customers')
 @Controller('customers')
+@UseInterceptors(CacheInterceptor)
 export class CustomersController {
   constructor(private customersService: CustomersService) {}
 

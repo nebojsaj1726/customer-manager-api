@@ -50,6 +50,6 @@ export class AuthService {
     const { email, password } = existingUser;
     const user = await this.validateUser(email, password);
     const jwt = await this.jwtService.signAsync({ user });
-    return { token: jwt };
+    return { ...user, token: jwt };
   }
 }

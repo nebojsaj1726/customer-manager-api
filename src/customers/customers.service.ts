@@ -25,7 +25,9 @@ export class CustomersService {
       .skip((page - 1) * limit)
       .limit(limit)
       .exec();
-    return { data, page };
+    const total = await this.customerModel.count();
+
+    return { data, total };
   }
 
   async findByCompany(filterQuery: FilterQueryDto) {
